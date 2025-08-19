@@ -13,43 +13,35 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
 
 export default function App() {
-  const [movies, setMovies] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [queryKey, setQueryKey] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [page, setPage] = useState(1);
 
-  const {
-    data: isMoviesData,
-    isError: isMoviesError,
-    isLoading: isMoviesLoading,
-    isSuccess: isMoviesSuccess,
-  } = useQuery({
-    queryKey: ["movies", movies, page],
-    queryFn: () => fetchMovies(movies, page),
-    enabled: !!movies,
+  const { data, isError, isLoading, isSuccess } = useQuery({
+    queryKey: ["movies", queryKey, page],
+    queryFn: () => fetchMovies(queryKey, page),
+    enabled: !!queryKey,
     placeholderData: keepPreviousData,
   });
 
-  const totalPages = isMoviesData?.total_pages || 0;
+  const totalPages = data?.total_pages || 0;
 
   const openModal = (movie: Movie) => {
     setSelectedMovie(movie);
-    setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setSelectedMovie(null);
-    setIsModalOpen(false);
   };
 
   useEffect(() => {
-    if (isMoviesSuccess && isMoviesData?.results?.length === 0) {
+    if (isSuccess && data?.results?.length === 0) {
       toast.error("No movies found for your request.");
     }
-  }, [isMoviesSuccess, isMoviesData]);
+  }, [isSuccess, data]);
 
   const handleSearch = (newQuery: string) => {
-    setMovies(newQuery);
+    setQueryKey(newQuery);
     setPage(1);
   };
 
@@ -57,7 +49,7 @@ export default function App() {
     <div className={css.app}>
       <SearchBar onSubmit={handleSearch} />
 
-      {isMoviesSuccess && totalPages > 1 && (
+      {isSuccess && totalPages > 1 && (
         <ReactPaginate
           pageCount={totalPages}
           pageRangeDisplayed={5}
@@ -72,14 +64,14 @@ export default function App() {
       )}
 
       <Toaster position="bottom-right" />
-      {isMoviesLoading && <Loader />}
-      {isMoviesError && <ErrorMessage />}
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
 
-      {isMoviesSuccess && isMoviesData?.results.length > 0 && (
-        <MovieGrid movies={isMoviesData.results} onSelect={openModal} />
+      {isSuccess && data?.results.length > 0 && (
+        <MovieGrid movies={data.results} onSelect={openModal} />
       )}
 
-      {isModalOpen && selectedMovie && (
+      {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={closeModal} />
       )}
     </div>
