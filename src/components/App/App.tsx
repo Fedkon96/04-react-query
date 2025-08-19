@@ -14,8 +14,6 @@ import ReactPaginate from "react-paginate";
 
 export default function App() {
   const [movies, setMovies] = useState("");
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [isError, setIsError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [page, setPage] = useState(1);
